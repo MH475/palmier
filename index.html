@@ -19,9 +19,6 @@ html,body{height:100%}
 body{
   background:var(--felt); color:var(--cream);
   font-family:'DM Mono',monospace; overflow-x:hidden;
-  background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%,rgba(201,168,76,0.06) 0%,transparent 70%),
-    url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
 }
 
 /* ════ LAYOUT ════ */
@@ -87,7 +84,7 @@ body{
 .cb-center { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;z-index:1; }
 .cb-suit-ghost { font-size:2.8rem;line-height:1;opacity:0.07; }
 .cb-suit-ghost.red{color:var(--red)}
-.cb-hint { position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:0.38rem;letter-spacing:0.04em;text-transform:uppercase;color:rgba(201,168,76,0.3);z-index:2;white-space:nowrap;overflow:hidden; }
+.cb-hint { position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:0.5rem;letter-spacing:0.04em;text-transform:uppercase;color:rgba(201,168,76,0.3);z-index:2;white-space:nowrap;overflow:hidden; }
 
 /* BACK hover */
 .cs:not(.flipped):hover .cf-back { border-color:rgba(201,168,76,0.4); box-shadow:0 12px 40px rgba(0,0,0,0.6),0 0 0 1px rgba(201,168,76,0.15); }
