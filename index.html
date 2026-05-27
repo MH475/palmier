@@ -221,21 +221,6 @@ body{
 .sb-sub{font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted)}
 
 /* ════ LIST VIEW ════ */
-.list-view{max-width:1080px;margin:0 auto;padding:0 20px 80px;display:none;flex-direction:column;gap:2px}
-.list-view.active{display:flex}
-.grid.list-hidden{display:none}
-.list-row{display:flex;align-items:center;gap:14px;padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid transparent;cursor:pointer;transition:all 0.15s}
-.list-row:hover{background:rgba(255,255,255,0.04);border-color:var(--card-border)}
-.list-row.hide{display:none}
-.list-row.played{opacity:0.35}
-.list-val{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--cream);width:28px}
-.list-val.red{color:var(--red)}
-.list-sym{font-size:1.1rem;width:18px}
-.list-sym.red{color:var(--red)}
-.list-suit-name{width:65px;font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);flex-shrink:0}
-.list-tag{width:100px;flex-shrink:0;font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);opacity:0.7}
-.list-rule{flex:1;font-size:0.76rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.list-status{width:16px;flex-shrink:0;font-size:0.7rem;color:var(--gold);text-align:right}
 
 @media(max-width:640px){
   :root{--card-w:108px;--card-h:158px;--panel-w:100vw}
@@ -458,16 +443,6 @@ body{
 
 
 /* Custom house rule card styling */
-.cs[data-custom="1"]:not(.flipped) .cf-back {
-  border-color: rgba(106,170,119,0.35);
-}
-.cs[data-custom="1"]:not(.flipped) .cb-hint {
-  color: rgba(106,170,119,0.7) !important;
-}
-.cs[data-custom="1"]:not(.flipped):hover .cf-back {
-  border-color: rgba(106,170,119,0.6);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(106,170,119,0.2);
-}
 .cs[data-custom="1"] .cf-front {
   background: linear-gradient(160deg, #f0faf2 0%, #e0f5e5 100%);
   border-color: rgba(106,170,119,0.6);
@@ -498,8 +473,6 @@ body{
     <div class="right-tools">
       <button class="icon-btn" id="btnPanel" onclick="togglePanel()">⚡ Règles actives <span id="panelBadge" style="display:none" class="rp-badge">0</span></button>
       <button class="icon-btn" id="btnEditor" onclick="openEditor()">✏ Éditeur de règles</button>
-      <button class="icon-btn" id="vGrid">⊞</button>
-      <button class="icon-btn active" id="vList" style="display:none">☰</button>
       <button class="icon-btn danger" onclick="resetAll()">↺ Reset</button>
     </div>
   </div>
@@ -516,7 +489,6 @@ body{
       <!-- GRID -->
       <div class="grid" id="grid"></div>
       <!-- LIST -->
-      <div class="list-view" id="listView"></div>
     </div>
   </div>
 </div>
@@ -903,14 +875,6 @@ function updateProgress() {
       (function(sym){ setTimeout(function(){ showSuitBanner(sym); }, 400); })(s.sym);
     }
   }
-  // Update list statuses
-  var rows = document.querySelectorAll('.list-row');
-  for (var j=0;j<rows.length;j++) {
-    var k2 = rows[j].getAttribute('data-key');
-    var st = rows[j].querySelector('.list-status');
-    if (st) st.textContent = played[k2] ? '\u2713' : '';
-    rows[j].className = 'list-row' + (played[k2] ? ' played' : '');
-  }
 }
 
 // Build DOM
@@ -922,8 +886,7 @@ function makeEl(tag, cls, txt) {
 }
 function build() {
   var grid = document.getElementById('grid');
-  var list = document.getElementById('listView');
-  grid.innerHTML = ''; list.innerHTML = '';
+  grid.innerHTML = '';
   for (var si = 0; si < SUITS.length; si++) {
     var suit = SUITS[si];
     var hdr = makeEl('div','suit-header');
@@ -952,21 +915,17 @@ function build() {
       var back = makeEl('div','cf-face cf-back');
       var pat = makeEl('div','cb-pattern');
       var ptl = makeEl('div','cb-pip-tl');
-      if(!isCustom){
-        ptl.appendChild(makeEl('span','cb-pip-val'+rc, v));
-        ptl.appendChild(makeEl('span','cb-pip-sym'+rc, suit.sym));
-      }
+      ptl.appendChild(makeEl('span','cb-pip-val'+rc, v));
+      ptl.appendChild(makeEl('span','cb-pip-sym'+rc, suit.sym));
       var ctr = makeEl('div','cb-center');
       ctr.appendChild(makeEl('span','cb-suit-ghost'+rc, suit.sym));
       var tw = makeEl('div','cb-timer-wrap');
       tw.innerHTML = '<svg class="cb-timer-svg" viewBox="0 0 54 54"><circle class="cb-timer-track" cx="27" cy="27" r="22"/><circle class="cb-timer-fill" cx="27" cy="27" r="22"/></svg><div class="cb-timer-label">--</div>';
       ctr.appendChild(tw);
       var pbr = makeEl('div','cb-pip-br');
-      if(!isCustom){
-        pbr.appendChild(makeEl('span','cb-pip-val'+rc, v));
-        pbr.appendChild(makeEl('span','cb-pip-sym'+rc, suit.sym));
-      }
-      var hint = (function(){var hint=document.createElement('div');hint.className='cb-hint';hint.textContent=isCustom?'\\u2726 Maison':'Cliquer pour révéler';return hint;})()
+      pbr.appendChild(makeEl('span','cb-pip-val'+rc, v));
+      pbr.appendChild(makeEl('span','cb-pip-sym'+rc, suit.sym));
+      var hint = (function(){var hint=document.createElement('div');hint.className='cb-hint';hint.textContent='Cliquer pour révéler';return hint;})()
       back.appendChild(pat); back.appendChild(ptl); back.appendChild(ctr); back.appendChild(hint);
       // FRONT
       var front = makeEl('div','cf-face cf-front');
@@ -985,18 +944,6 @@ function build() {
       sc.appendChild(cf);
       (function(k){ sc.addEventListener('click', function(){ onCard(document.querySelector('[data-key="'+k+'"]')); }); })(key);
       grid.appendChild(sc);
-      // LIST ROW
-      var lr = makeEl('div','list-row');
-      lr.setAttribute('data-key', key);
-      lr.setAttribute('data-suit', suit.sym);
-      lr.appendChild(makeEl('span','list-val'+rc, v));
-      lr.appendChild(makeEl('span','list-sym'+rc, suit.sym));
-      lr.appendChild(makeEl('span','list-suit-name', suit.name));
-      lr.appendChild(makeEl('span','list-tag', d.tag||''));
-      lr.appendChild(makeEl('span','list-rule', d.rule||''));
-      lr.appendChild(makeEl('span','list-status',''));
-      (function(k){ lr.addEventListener('click', function(){ openModal(k); }); })(key);
-      list.appendChild(lr);
     }
   }
   buildProgSuits();
@@ -1109,30 +1056,8 @@ function applyFilter() {
     var hshow = !isSuit || hs === f;
     hdrs[j].style.display = hshow ? '' : 'none';
   }
-  var lrows = document.querySelectorAll('.list-row');
-  for (var l=0;l<lrows.length;l++) {
-    var lk=lrows[l].getAttribute('data-key'), ls=lrows[l].getAttribute('data-suit');
-    var lshow = true;
-    if (isSuit) lshow = ls === f;
-    else if (f==='played') lshow = !!played[lk];
-    else if (f==='unplayed') lshow = !played[lk];
-    lrows[l].className = lrows[l].className.replace(' hide','') + (lshow?'':' hide');
-  }
 }
 
-// View toggle
-document.getElementById('vGrid').addEventListener('click', function() {
-  this.className += ' active';
-  document.getElementById('vList').className = document.getElementById('vList').className.replace(' active','');
-  document.getElementById('grid').className = document.getElementById('grid').className.replace(' list-hidden','');
-  document.getElementById('listView').className = document.getElementById('listView').className.replace(' active','');
-});
-document.getElementById('vList').addEventListener('click', function() {
-  this.className += ' active';
-  document.getElementById('vGrid').className = document.getElementById('vGrid').className.replace(' active','');
-  document.getElementById('grid').className += ' list-hidden';
-  document.getElementById('listView').className += ' active';
-});
 
 // Reset
 function resetAll() {
@@ -1144,8 +1069,6 @@ function resetAll() {
   for (var i=0;i<cards.length;i++) {
     cards[i].className = cards[i].className.replace(' flipped','').replace(' played','').replace(' hide','').replace(' has-timer','');
   }
-  var lrows = document.querySelectorAll('.list-row');
-  for (var j=0;j<lrows.length;j++) lrows[j].className = 'list-row';
   updateProgress();
   applyFilter();
   showToast('Nouvelle partie \ud83c\udf34');
@@ -1172,7 +1095,10 @@ function showToast(msg) {
 
 // Keyboard
 document.addEventListener('keydown', function(e) {
+  var tag = document.activeElement ? document.activeElement.tagName : '';
+  var isTyping = tag === 'INPUT' || tag === 'TEXTAREA';
   if (e.key === 'Escape') closeModal();
+  if (isTyping) return;
   if (e.key === 'f' || e.key === 'F') toggleFullscreen();
   if (e.key === 'r' || e.key === 'R') togglePanel();
 });
