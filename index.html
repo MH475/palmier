@@ -193,6 +193,14 @@ body{
 .toggle-thumb{position:absolute;top:2px;left:2px;width:14px;height:14px;background:var(--cream);border-radius:50%;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3)}
 .timer-toggle input:checked~.toggle-thumb{transform:translateX(16px)}
 
+/* ════ CONFIRM DIALOG ════ */
+.confirm-overlay{position:fixed;inset:0;background:rgba(5,8,13,0.75);z-index:700;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.2s;backdrop-filter:blur(4px)}
+.confirm-overlay.open{opacity:1;pointer-events:all}
+.confirm-box{background:#141c28;border:1px solid var(--card-border);border-radius:14px;padding:26px 28px;max-width:340px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.7);transform:scale(0.95);transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1)}
+.confirm-overlay.open .confirm-box{transform:scale(1)}
+.confirm-msg{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:300;color:var(--cream);line-height:1.6;margin-bottom:20px}
+.confirm-actions{display:flex;gap:10px}
+
 .modal-actions{display:flex;gap:10px}
 .m-btn{flex:1;padding:12px 16px;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;border:none}
 .m-btn-primary{background:var(--gold);color:#0d1117;font-weight:500}
@@ -541,6 +549,17 @@ body{
   <span class="sb-sub" id="sbSub"></span>
 </div>
 
+<!-- ═══ CONFIRM ═══ -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p class="confirm-msg" id="confirmMsg"></p>
+    <div class="confirm-actions">
+      <button class="m-btn m-btn-undo" id="confirmYes">Supprimer</button>
+      <button class="m-btn m-btn-secondary" id="confirmNo">Annuler</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ TOAST ═══ -->
 <div class="toast" id="toast"></div>
 
@@ -569,13 +588,13 @@ var R = {
   '\u26609':{rule:"Rimes \u2014 Dis un mot. Le tour de table doit rimer. Celui qui bloque boit.",tag:"Poesie"},
   '\u266010':{rule:"Categories \u2014 Tu lances une categorie (ex: marques de voiture). Le tour s'enchaine. Celui qui bloque boit.",tag:"Culture"},
   '\u2660V':{rule:"Valet de Pique \u2014 Le sens du jeu s'inverse. La personne qui vient de jouer boit.",tag:"Chaos"},
-  '\u2660D':{rule:"Dame des murmures \u2014 Regle permanente: tout le monde doit chuchoter. Parler fort = boire.",tag:"Silence",permanent:true},
+  '\u2660D':{rule:"Dames retournees \u2014 Tout le monde boit 1 gorgee par Dame deja retournee dans la partie, celle-ci comprise.",tag:"Dames"},
   '\u2660R':{rule:"Roi de Pique \u2014 Tu distribues 4 gorgees comme tu veux.",tag:"Despote"},
-  '\u26651':{rule:"As d'amour \u2014 Tu choisis quelqu'un. Cette personne et toi etes immunises contre la prochaine regle punitive.",tag:"Protection",special:true,permanent:true},
+  '\u26651':{rule:"Revanche \u2014 Tu choisis une carte deja retournee et tu rejoues sa regle comme si elle venait d'etre tiree.",tag:"Revanche"},
   '\u26652':{rule:"Dedicace \u2014 Tu offres 2 gorgees a la personne de ton choix.",tag:"Cadeau"},
   '\u26653':{rule:"Trois petits cochons \u2014 Chacun souffle sur son verre. Le dernier a souffler boit.",tag:"Ridicule"},
   '\u26654':{rule:"Les flatteurs \u2014 Tout le monde doit te faire un compliment. Le moins convaincant boit.",tag:"Ego"},
-  '\u26655':{rule:"Question d'amour \u2014 Pose une question a quelqu'un. Il ne peut pas repondre par oui ni par non.",tag:"Interdit"},
+  '\u26655':{rule:"Confession \u2014 Tu poses une question personnelle a quelqu'un. Il repond honn\u00eatement ou boit 2 gorgees.",tag:"Confession"},
   '\u26656':{rule:"Anniversaire \u2014 Si c'est ton mois de naissance, bois la moitie de ton verre. Sinon, offre 1 gorgee.",tag:"Destin"},
   '\u26657':{rule:"Pouce \u2014 Regle permanente: tu peux poser ton pouce sur la table a tout moment. Le dernier a imiter boit.",tag:"Vigilance",permanent:true},
   '\u26658':{rule:"Voisins du coeur \u2014 Tes deux voisins immediats boivent chacun 1 gorgee.",tag:"Proximite"},
@@ -584,30 +603,30 @@ var R = {
   '\u2665V':{rule:"Valet de Coeur \u2014 Tout le monde dit quelque chose de gentil sur la personne a sa gauche. Refuser = boire.",tag:"Tendresse"},
   '\u2665D':{rule:"Dame de Coeur \u2014 Regle permanente: les garcons ne peuvent plus dire boire. Remplacez par siroter.",tag:"Vocabulaire",permanent:true},
   '\u2665R':{rule:"Roi des coeurs \u2014 Tu choisis un defi. Si quelqu'un echoue il boit. Si tout le monde reussit tu bois.",tag:"Pari"},
-  '\u26661':{rule:"As de Carreau \u2014 Invente une regle permanente. La table vote: approuvee a la majorite elle s'applique.",tag:"Legislateur",special:true,permanent:true},
+  '\u26661':{rule:"As de Carreau \u2014 Duel — Tu defies un joueur a pierre-feuille-ciseaux. Le perdant boit 3 gorgees. En cas d'egalite, on recommence jusqu'a ce qu'il y ait un gagnant.",tag:"Duel"},
   '\u26662':{rule:"Double peine \u2014 La prochaine personne qui se trompe dans une regle boit double.",tag:"Piege",permanent:true},
   '\u26663':{rule:"Triangle \u2014 Forme un triangle avec deux autres joueurs. Distribuez-vous 3 gorgees.",tag:"Alliance"},
-  '\u26664':{rule:"Quatre coins \u2014 Les 4 joueurs dans les coins boivent. Pas de coins ? Les 4 premiers assis boivent.",tag:"Geographie"},
+  '\u26664':{rule:"Oeil pour oeil \u2014 Tu choisis un joueur. Vous vous regardez dans les yeux sans clignoter. Le premier a clignoter boit 3 gorgees.",tag:"Duel"},
   '\u26665':{rule:"Cinq secondes \u2014 Tu poses une question a quelqu'un. Il a 5 secondes pour repondre. Sinon il boit.",tag:"Chrono"},
-  '\u26666':{rule:"Jackpot \u2014 Lance un de. Pair = la table boit. Impair = tu bois.",tag:"Chance"},
+  '\u26666':{rule:"Rapidite \u2014 Tu poses une question de culture generale. Le premier a repondre correctement distribue 3 gorgees.",tag:"Culture"},
   '\u26667':{rule:"Cascade \u2014 Tu bois, puis la personne a ta gauche, et ainsi de suite jusqu'a ce que tu t'arretes.",tag:"Domino"},
   '\u26668':{rule:"Statue \u2014 Jusqu'a la prochaine carte \u2666 retournee, tout le monde doit etre immobile quand quelqu'un parle.",tag:"Discipline",untilNext:true},
   '\u26669':{rule:"Neuf vies \u2014 Tu peux annuler la prochaine regle qui te punit. Usage unique.",tag:"Joker",permanent:true},
-  '\u266610':{rule:"Monnaie \u2014 Chaque joueur estime combien de pieces sont dans la poche du donneur. Le plus loin boit.",tag:"Estimations"},
+  '\u266610':{rule:"Je n'ai jamais \u2014 Enonce quelque chose que tu n'as jamais fait. Tous ceux qui l'ont fait boivent une gorgee.",tag:"Aveux"},
   '\u2666V':{rule:"Valet de Carreau \u2014 Echange ta place avec n'importe quel joueur. Le joueur deplace boit.",tag:"Mobilite"},
   '\u2666D':{rule:"Dame de Carreau \u2014 Regle permanente: interdiction de pointer du doigt. Infraction = boire.",tag:"Gestuelle",permanent:true},
   '\u2666R':{rule:"Roi de Carreau \u2014 Tu distribues 3 gorgees ET tu en bois 1 toi-meme.",tag:"Noblesse oblige"},
   '\u26631':{rule:"As de Trefle \u2014 Porte-bonheur! Tu es immunise contre la prochaine carte punitive te ciblant.",tag:"Bouclier",special:true,permanent:true},
   '\u26632':{rule:"Paire \u2014 La personne a ta droite et toi buvez ensemble, en meme temps.",tag:"Synchro"},
-  '\u26633':{rule:"Trefle a 3 feuilles \u2014 Dis 3 mensonges. Les autres doivent en deviner un vrai. Celui qui echoue boit.",tag:"Mystere"},
+  '\u26633':{rule:"Trefle compteur \u2014 Tour de table : chaque joueur dit un chiffre a la suite, mais remplace les multiples de 3 par Trefle ! Celui qui se trompe boit.",tag:"Concentration"},
   '\u26634':{rule:"Question interdite \u2014 Regle permanente: personne ne peut repondre a une question par une question.",tag:"Logique",permanent:true},
   '\u26635':{rule:"Cinq de Trefle \u2014 Tour de comptage: remplacez les multiples de 5 par Palmier! Celui qui se trompe boit.",tag:"Concentration"},
-  '\u26636':{rule:"Cimetiere \u2014 Toutes les regles permanentes actives sont annulees. Table rase!",tag:"Reset"},
-  '\u26637':{rule:"Trefle chanceux \u2014 Tu choisis quelqu'un d'exempte de boire jusqu'a la prochaine carte \u2663 retournee.",tag:"Grace",untilNext:true},
+  '\u26636':{rule:"Cimetiere \u2014 Tu choisis une regle active dans le panneau et tu l'annules definitivement.",tag:"Suppression"},
+  '\u26637':{rule:"Trefle chanceux \u2014 Tu choisis un joueur. Il est immunise contre toute regle qui le force a boire jusqu'a la prochaine carte \u2663 retournee.",tag:"Grace",untilNext:true},
   '\u26638':{rule:"Imposteur \u2014 Jusqu'a la prochaine carte \u2663 retournee, prends le prenom d'un autre joueur.",tag:"Identite",untilNext:true},
   '\u26639':{rule:"Verlan \u2014 Regle permanente: tous les prenoms doivent etre dits en verlan. Infraction = boire.",tag:"Langage",permanent:true},
   '\u266310':{rule:"Tontine \u2014 Tout le monde sauf toi boit 1 gorgee.",tag:"Collectif"},
-  '\u2663V':{rule:"Valet de Trefle \u2014 Choisis un joueur. Il imite ta facon de boire. Toi aussi tu l'imites.",tag:"Miroir",permanent:true},
+  '\u2663V':{rule:"Valet de Trefle \u2014 Des maintenant, tout le monde doit retenir son fou rire. Le premier a rire boit.",tag:"Fou rire"},
   '\u2663D':{rule:"Dame de Trefle \u2014 Regle permanente: interdiction de dire non. Infraction = boire.",tag:"Positif",permanent:true},
   '\u2663R':{rule:"Roi de Trefle \u2014 La table entiere boit. Tu choisis le rythme: lentement ou cul-sec.",tag:"Rituel"}
 };
@@ -821,9 +840,8 @@ function renderPanel() {
     if (e.isUntilNext) { var bd=document.createElement('span'); bd.className='rp-timer-badge'; bd.textContent='prochain '+e.suitSym; idDiv.appendChild(bd); }
     var rp = document.createElement('p'); rp.className='rp-rule-text'; rp.textContent=e.rule;
     div.appendChild(idDiv); div.appendChild(rp);
-    div.title = 'Cliquer pour retirer';
     div.style.cursor = 'pointer';
-    (function(k){ div.onclick = function(){ removeActiveRule(k); updatePanelBadge(); }; })(e.key);
+    (function(k, label){ div.onclick = function(){ showConfirm('Retirer la règle "' + label + '" ?', function(){ removeActiveRule(k); updatePanelBadge(); }); }; })(e.key, e.tag || e.key);
     body.appendChild(div);
   }
 }
@@ -1061,17 +1079,15 @@ function applyFilter() {
 
 // Reset
 function resetAll() {
-  if (!confirm('Nouvelle partie ? Tout sera reinitialise.')) return;
-  played = {}; flipped = {}; suitComplete = {};
-  untilNextBySuit = {};
-  clearAllActiveRules();
-  var cards = document.querySelectorAll('.cs');
-  for (var i=0;i<cards.length;i++) {
-    cards[i].className = cards[i].className.replace(' flipped','').replace(' played','').replace(' hide','').replace(' has-timer','');
-  }
-  updateProgress();
-  applyFilter();
-  showToast('Nouvelle partie \ud83c\udf34');
+  showConfirm('Nouvelle partie ? Les cartes sont remises face cach\u00e9e. Les r\u00e8gles maison et modifications sont conserv\u00e9es.', function() {
+    played = {}; flipped = {}; suitComplete = {};
+    untilNextBySuit = {};
+    clearAllActiveRules();
+    build();
+    updateProgress();
+    applyFilter();
+    showToast('Nouvelle partie \ud83c\udf34');
+  });
 }
 
 // Fullscreen
@@ -1084,6 +1100,20 @@ function toggleFullscreen() {
     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
   }
 }
+
+// Confirm dialog
+function showConfirm(msg, onYes) {
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmOverlay').className = 'confirm-overlay open';
+  document.getElementById('confirmYes').onclick = function(){ closeConfirm(); onYes(); };
+  document.getElementById('confirmNo').onclick = closeConfirm;
+}
+function closeConfirm() {
+  document.getElementById('confirmOverlay').className = 'confirm-overlay';
+}
+document.getElementById('confirmOverlay').addEventListener('click', function(e){
+  if (e.target === this) closeConfirm();
+});
 
 // Toast
 function showToast(msg) {
