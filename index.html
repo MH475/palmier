@@ -1087,7 +1087,7 @@ function resetAll() {
     updateProgress();
     applyFilter();
     showToast('Nouvelle partie \ud83c\udf34');
-  });
+  }, 'Confirmer');
 }
 
 // Fullscreen
@@ -1102,8 +1102,9 @@ function toggleFullscreen() {
 }
 
 // Confirm dialog
-function showConfirm(msg, onYes) {
+function showConfirm(msg, onYes, btnLabel) {
   document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmYes').textContent = btnLabel || 'Supprimer';
   document.getElementById('confirmOverlay').className = 'confirm-overlay open';
   document.getElementById('confirmYes').onclick = function(){ closeConfirm(); onYes(); };
   document.getElementById('confirmNo').onclick = closeConfirm;
