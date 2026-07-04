@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SNIPER 🎯</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #12121a;
+    --border: #1e1e2e;
+    --accent: #ff3b3b;
+    --accent2: #ff8c00;
+    --gold: #ffd700;
+    --text: #eeeef5;
+    --muted: #6666888;
+    --success: #00e676;
+    --p1: #ff3b3b;
+    --p2: #3b8fff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 40% at 20% 50%, rgba(255,59,59,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 80% 50%, rgba(59,143,255,0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Crosshair lines */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(255,59,59,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,59,59,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 480px;
+    padding: 20px 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .logo {
+    font-family: 'Black Ops One', cursive;
+    font-size: 52px;
+    letter-spacing: 8px;
+    color: var(--text);
+    line-height: 1;
+    position: relative;
+    display: inline-block;
+  }
+
+  .logo::before {
+    content: 'SNIPER';
+    position: absolute;
+    inset: 0;
+    color: var(--accent);
+    clip-path: polygon(0 0, 100% 0, 100% 40%, 0 40%);
+    opacity: 0.4;
+    transform: translateX(2px);
+  }
+
+  .logo-icon {
+    font-size: 28px;
+    display: block;
+    margin-top: 4px;
+    animation: pulse-target 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-target {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.15); opacity: 0.8; }
+  }
+
+  .subtitle {
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  /* SCORE BOARD */
+  .scoreboard {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  .player-score {
+    text-align: center;
+  }
+
+  .player-name-input {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid;
+    color: var(--text);
+    font-family: 'Black Ops One', cursive;
+    font-size: 16px;
+    text-align: center;
+    width: 100%;
+    padding: 2px 4px;
+    outline: none;
+    letter-spacing: 1px;
+  }
+
+  .p1-color { border-color: var(--p1); color: var(--p1); }
+  .p2-color { border-color: var(--p2); color: var(--p2); }
+
+  .sips-count {
+    font-family: 'Black Ops One', cursive;
+    font-size: 36px;
+    line-height: 1;
+    margin-top: 4px;
+  }
+
+  .sips-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #666;
+    text-transform: uppercase;
+  }
+
+  .vs-badge {
+    font-family: 'Black Ops One', cursive;
+    font-size: 20px;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(255,215,0,0.5);
+  }
+
+  /* ROUND INDICATOR */
+  .round-info {
+    text-align: center;
+    margin-bottom: 16px;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  .round-info span {
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  /* QUESTION CARD */
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--p1), var(--gold), var(--p2));
+  }
+
+  .question-category {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .question-text {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+
+  .question-hint {
+    font-size: 13px;
+    color: #555;
+    font-style: italic;
+  }
+
+  /* ANSWER SECTION */
+  .answer-section {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .answer-section.active { display: flex; }
+
+  .player-answer-block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.3s ease;
+  }
+
+  .player-answer-block.p1-block { border-left: 3px solid var(--p1); }
+  .player-answer-block.p2-block { border-left: 3px solid var(--p2); }
+
+  .answer-label {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .answer-label.p1 { color: var(--p1); }
+  .answer-label.p2 { color: var(--p2); }
+
+  .answer-input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid #2a2a3a;
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .answer-input:focus { border-color: #444; }
+
+  /* REVEAL SECTION */
+  .reveal-section {
+    display: none;
+    gap: 12px;
+    flex-direction: column;
+  }
+
+  .reveal-section.active { display: flex; }
+
+  .reveal-card {
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .reveal-card.p1-reveal { 
+    background: rgba(255,59,59,0.08);
+    border: 1px solid rgba(255,59,59,0.3);
+  }
+
+  .reveal-card.p2-reveal { 
+    background: rgba(59,143,255,0.08);
+    border: 1px solid rgba(59,143,255,0.3);
+  }
+
+  .reveal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .reveal-player-name {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .reveal-player-name.p1 { color: var(--p1); }
+  .reveal-player-name.p2 { color: var(--p2); }
+
+  .answer-display {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .guess-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 4px;
+  }
+
+  .guess-display {
+    font-size: 16px;
+    font-weight: 600;
+    color: #aaa;
+  }
+
+  .result-badge {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 8px;
+  }
+
+  .result-hit {
+    background: rgba(0,230,118,0.15);
+    color: var(--success);
+    border: 1px solid rgba(0,230,118,0.3);
+  }
+
+  .result-miss {
+    background: rgba(255,59,59,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(255,59,59,0.3);
+  }
+
+  .drink-alert {
+    background: rgba(255,59,59,0.1);
+    border: 1px solid rgba(255,59,59,0.4);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1px;
+    animation: flash-alert 0.5s ease;
+  }
+
+  @keyframes flash-alert {
+    0% { transform: scale(0.95); opacity: 0; }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* BUTTONS */
+  .btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Black Ops One', cursive;
+    font-size: 16px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #cc0000);
+    color: white;
+    box-shadow: 0 4px 20px rgba(255,59,59,0.3);
+  }
+
+  .btn-primary:hover { box-shadow: 0 4px 30px rgba(255,59,59,0.5); }
+
+  .btn-secondary {
+    background: transparent;
+    color: #555;
+    border: 1px solid #2a2a3a;
+    font-size: 13px;
+  }
+
+  .btn-secondary:hover { border-color: #444; color: #888; }
+
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), #cc9900);
+    color: #000;
+    box-shadow: 0 4px 20px rgba(255,215,0,0.2);
+  }
+
+  /* STEP INDICATOR */
+  .step-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+
+  .step-pill {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .step-pill.active { background: var(--accent); }
+  .step-pill.done { background: var(--success); }
+
+  /* PHASE LABEL */
+  .phase-label {
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #444;
+    margin-bottom: 14px;
+  }
+
+  /* GAME OVER */
+  .gameover {
+    display: none;
+    text-align: center;
+    padding: 30px 0;
+  }
+
+  .gameover.active { display: block; }
+
+  .gameover-title {
+    font-family: 'Black Ops One', cursive;
+    font-size: 38px;
+    letter-spacing: 6px;
+    margin-bottom: 8px;
+  }
+
+  .gameover-subtitle {
+    font-size: 14px;
+    color: #555;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .final-score {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .final-player {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .final-player.winner {
+    border-color: var(--gold);
+    background: rgba(255,215,0,0.05);
+  }
+
+  .winner-crown { font-size: 28px; display: block; margin-bottom: 4px; }
+
+  .final-name {
+    font-family: 'Black Ops One', cursive;
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  .final-sips {
+    font-family: 'Black Ops One', cursive;
+    font-size: 32px;
+  }
+
+  .final-sips.p1c { color: var(--p1); }
+  .final-sips.p2c { color: var(--p2); }
+
+  .final-label { font-size: 11px; color: #555; letter-spacing: 2px; }
+
+  /* HIDDEN INPUT TRICK */
+  .hidden-phase {
+    display: none;
+  }
+
+  .hidden-phase.active {
+    display: block;
+  }
+
+  /* SEPARATOR */
+  .sep {
+    text-align: center;
+    color: #333;
+    font-size: 18px;
+    margin: 4px 0;
+  }
+
+  /* ROUNDS NAV */
+  .rounds-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #444;
+  }
+
+  .rounds-nav span { color: #666; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--gold);
+    color: #000;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-family: 'Black Ops One', cursive;
+    font-size: 14px;
+    letter-spacing: 2px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 100;
+    white-space: nowrap;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .btn-judge {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+
+  .btn-judge:active { transform: scale(0.96); }
+
+  .btn-judge-hit {
+    background: rgba(0,230,118,0.15);
+    color: var(--success);
+    border: 1px solid rgba(0,230,118,0.4);
+  }
+
+  .btn-judge-hit:hover { background: rgba(0,230,118,0.25); }
+
+  .btn-judge-miss {
+    background: rgba(255,59,59,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(255,59,59,0.3);
+  }
+
+  .btn-judge-miss:hover { background: rgba(255,59,59,0.25); }
+
+  @media (max-width: 380px) {
+    .logo { font-size: 40px; }
+    .question-text { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">SNIPER<span class="logo-icon">🎯</span></div>
+    <div class="subtitle">Qui connaît le mieux l'autre ?</div>
+  </div>
+
+  <!-- START SCREEN -->
+  <div id="startScreen">
+    <div style="text-align:center; margin-bottom:28px;">
+      <div style="font-size:14px; color:#555; letter-spacing:3px; text-transform:uppercase; margin-bottom:20px;">Entrez vos prénoms</div>
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <div>
+          <div style="font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--p1); margin-bottom:8px; text-align:left;">JOUEUR 1</div>
+          <input id="startP1" class="answer-input" placeholder="Ton prénom..." maxlength="14" style="font-size:20px; font-family:'Black Ops One',cursive; text-align:center; padding:14px;" />
+        </div>
+        <div>
+          <div style="font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--p2); margin-bottom:8px; text-align:left;">JOUEUR 2</div>
+          <input id="startP2" class="answer-input" placeholder="Son prénom..." maxlength="14" style="font-size:20px; font-family:'Black Ops One',cursive; text-align:center; padding:14px;" />
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="startGame()">C'EST PARTI 🎯</button>
+  </div>
+
+  <!-- MAIN GAME -->
+  <div id="gameArea" style="display:none;">
+
+    <!-- SCOREBOARD -->
+    <div class="scoreboard">
+      <div class="player-score">
+        <div class="player-name-input p1-color" id="p1name" style="font-family:'Black Ops One',cursive; font-size:16px; letter-spacing:1px; padding:2px 4px; border-bottom: 2px solid var(--p1);">J1</div>
+        <div class="sips-count p1-color" id="p1sips">0</div>
+        <div class="sips-label">gorgées</div>
+      </div>
+      <div class="vs-badge">VS</div>
+      <div class="player-score">
+        <div class="player-name-input p2-color" id="p2name" style="font-family:'Black Ops One',cursive; font-size:16px; letter-spacing:1px; padding:2px 4px; border-bottom: 2px solid var(--p2);">J2</div>
+        <div class="sips-count p2-color" id="p2sips">0</div>
+        <div class="sips-label">gorgées</div>
+      </div>
+    </div>
+
+    <!-- STEP INDICATOR -->
+    <div class="step-row">
+      <div class="step-pill active" id="step1"></div>
+      <div class="step-pill" id="step2"></div>
+      <div class="step-pill" id="step3"></div>
+    </div>
+
+    <!-- ROUND INFO -->
+    <div class="round-info">Round <span id="roundNum">1</span> / <span id="totalRounds">10</span></div>
+
+    <!-- PHASE 1: QUESTION -->
+    <div id="phaseQuestion" class="hidden-phase active">
+      <div class="phase-label">📋 La question</div>
+      <div class="question-card">
+        <div class="question-category" id="qCategory">GOÛTS</div>
+        <div class="question-text" id="qText">Chargement...</div>
+        <div class="question-hint" id="qHint"></div>
+      </div>
+      <button class="btn btn-primary" onclick="goToAnswers()">ON Y VA 🎯</button>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="skipQuestion()">🔄 Changer de question</button>
+    </div>
+
+    <!-- PHASE 2: ANSWERS (secret) -->
+    <div id="phaseAnswers" class="hidden-phase">
+      <div class="phase-label">✏️ Répondez séparément (sans montrer !)</div>
+      <div class="question-card" style="margin-bottom:12px; padding:16px 18px;">
+        <div class="question-category" id="qCategory2"></div>
+        <div class="question-text" style="font-size:17px;" id="qText2"></div>
+      </div>
+
+      <!-- P1 answers -->
+      <div id="p1AnswerBlock" class="answer-section active">
+        <div class="player-answer-block p1-block">
+          <div class="answer-label p1" id="p1AnswerLabel">JOUEUR 1</div>
+          <div style="margin-bottom:10px;">
+            <div style="font-size:12px; color:#555; letter-spacing:1px; margin-bottom:5px;">MA RÉPONSE</div>
+            <input class="answer-input" id="p1answer" placeholder="Ta réponse..." />
+          </div>
+          <div>
+            <div style="font-size:12px; color:#555; letter-spacing:1px; margin-bottom:5px;">CE QUE JE PENSE QUE JOUEUR 2 VA RÉPONDRE</div>
+            <input class="answer-input" id="p1guess" placeholder="Sa réponse selon toi..." />
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="submitP1()">VALIDER →</button>
+      </div>
+
+      <!-- P2 answers -->
+      <div id="p2AnswerBlock" class="answer-section">
+        <div class="player-answer-block p2-block">
+          <div class="answer-label p2" id="p2AnswerLabel">JOUEUR 2</div>
+          <div style="margin-bottom:10px;">
+            <div style="font-size:12px; color:#555; letter-spacing:1px; margin-bottom:5px;">MA RÉPONSE</div>
+            <input class="answer-input" id="p2answer" placeholder="Ta réponse..." />
+          </div>
+          <div>
+            <div style="font-size:12px; color:#555; letter-spacing:1px; margin-bottom:5px;">CE QUE JE PENSE QUE JOUEUR 1 VA RÉPONDRE</div>
+            <input class="answer-input" id="p2guess" placeholder="Sa réponse selon toi..." />
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="submitP2()">VALIDER →</button>
+      </div>
+
+      <button class="btn btn-secondary" style="margin-top:4px;" onclick="goToQuestion()">← Retour</button>
+    </div>
+
+    <!-- PHASE 3: REVEAL -->
+    <div id="phaseReveal" class="hidden-phase">
+      <div class="phase-label">🔍 Révélation — jugez vous-mêmes !</div>
+
+      <div class="reveal-section active" id="revealCards">
+        <div class="reveal-card p1-reveal">
+          <div class="reveal-header">
+            <div class="reveal-player-name p1" id="revP1Name">JOUEUR 1</div>
+          </div>
+          <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#555; margin-bottom:3px;">SA RÉPONSE</div>
+          <div class="answer-display" id="revP1Answer">—</div>
+          <div class="guess-label">JOUEUR 2 PENSAIT QUE...</div>
+          <div class="guess-display" id="revP2Guess">—</div>
+          <div id="p2resultBadge"></div>
+          <div id="p2manualBtns" style="display:none; margin-top:10px; display:flex; gap:8px;">
+            <button class="btn-judge btn-judge-hit" onclick="manualJudge('p2', true)">🎯 C'est bon !</button>
+            <button class="btn-judge btn-judge-miss" onclick="manualJudge('p2', false)">💥 Raté !</button>
+          </div>
+        </div>
+
+        <div class="sep">⬇</div>
+
+        <div class="reveal-card p2-reveal">
+          <div class="reveal-header">
+            <div class="reveal-player-name p2" id="revP2Name">JOUEUR 2</div>
+          </div>
+          <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#555; margin-bottom:3px;">SA RÉPONSE</div>
+          <div class="answer-display" id="revP2Answer">—</div>
+          <div class="guess-label">JOUEUR 1 PENSAIT QUE...</div>
+          <div class="guess-display" id="revP1Guess">—</div>
+          <div id="p1resultBadge"></div>
+          <div id="p1manualBtns" style="display:none; margin-top:10px; display:flex; gap:8px;">
+            <button class="btn-judge btn-judge-hit" onclick="manualJudge('p1', true)">🎯 C'est bon !</button>
+            <button class="btn-judge btn-judge-miss" onclick="manualJudge('p1', false)">💥 Raté !</button>
+          </div>
+        </div>
+
+        <div id="drinkAlert"></div>
+
+        <button class="btn btn-gold" id="nextRoundBtn" onclick="nextRound()" style="display:none;">ROUND SUIVANT 🎯</button>
+        <button class="btn btn-secondary" onclick="goToQuestion()">← Retour</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- GAME OVER -->
+  <div class="gameover" id="gameOver">
+    <div class="gameover-title">🎯 FIN !</div>
+    <div class="gameover-subtitle">Le sniper a tiré</div>
+
+    <div class="final-score">
+      <div class="final-player" id="finalP1Card">
+        <div class="final-name" id="finalP1Name">J1</div>
+        <div class="final-sips p1c" id="finalP1Sips">0</div>
+        <div class="final-label">GORGÉES</div>
+      </div>
+      <div class="final-player" id="finalP2Card">
+        <div class="final-name" id="finalP2Name">J2</div>
+        <div class="final-sips p2c" id="finalP2Sips">0</div>
+        <div class="final-label">GORGÉES</div>
+      </div>
+    </div>
+
+    <div id="winnerText" style="font-family:'Black Ops One',cursive; font-size:18px; letter-spacing:3px; margin-bottom:24px; color:var(--gold);"></div>
+
+    <button class="btn btn-primary" onclick="restartGame()">REJOUER 🔄</button>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const QUESTIONS = [
+  // GOÛTS
+  { category: "GOÛTS", text: "Quel est ton film préféré de tous les temps ?", hint: "" },
+  { category: "GOÛTS", text: "Quelle chanson tu mettrais en boucle sur une île déserte ?", hint: "" },
+  { category: "GOÛTS", text: "Pizza ou burger ?", hint: "" },
+  { category: "GOÛTS", text: "Quelle est ta boisson préférée (hors alcool) ?", hint: "" },
+  { category: "GOÛTS", text: "Quelle série tu conseillerais à tout le monde ?", hint: "" },
+  { category: "GOÛTS", text: "Quelle cuisine du monde tu mangerais tous les jours ?", hint: "" },
+  { category: "GOÛTS", text: "Plage ou montagne ?", hint: "" },
+  { category: "GOÛTS", text: "Quel est ton snack préféré pour regarder un film ?", hint: "" },
+  { category: "GOÛTS", text: "Quelle appli tu garderais si tu ne pouvais en avoir qu'une ?", hint: "" },
+  { category: "GOÛTS", text: "Quel est ton style de musique préféré ?", hint: "" },
+  { category: "GOÛTS", text: "Café ou thé ?", hint: "" },
+  { category: "GOÛTS", text: "Quel est ton emoji le plus utilisé ?", hint: "" },
+  { category: "GOÛTS", text: "Quelle est ta saison préférée ?", hint: "" },
+  { category: "GOÛTS", text: "Quel est ton fast food préféré ?", hint: "" },
+  { category: "GOÛTS", text: "Plutôt Netflix ou soirée entre amis ?", hint: "" },
+  // RÊVES & VIE
+  { category: "RÊVES ✨", text: "Si tu pouvais voyager n'importe où demain, tu irais où ?", hint: "" },
+  { category: "RÊVES ✨", text: "Quel métier tu ferais si l'argent n'existait pas ?", hint: "" },
+  { category: "RÊVES ✨", text: "Quelle est ta plus grande ambition dans la vie ?", hint: "" },
+  { category: "RÊVES ✨", text: "Si tu pouvais avoir un super pouvoir, ce serait lequel ?", hint: "" },
+  { category: "RÊVES ✨", text: "Quelle est la chose dont tu es le plus fier dans ta vie ?", hint: "" },
+  { category: "RÊVES ✨", text: "Dans 10 ans, tu te vois où ?", hint: "" },
+  { category: "RÊVES ✨", text: "Quel est ton talent caché ?", hint: "" },
+  { category: "RÊVES ✨", text: "Quelle langue tu rêverais de parler couramment ?", hint: "" },
+  { category: "RÊVES ✨", text: "Si tu pouvais dîner avec n'importe qui au monde, ce serait qui ?", hint: "" },
+  { category: "RÊVES ✨", text: "Quel est le truc le plus fun que tu aies jamais fait ?", hint: "" },
+  // CHAOS FUN
+  { category: "CHAOS 🔥", text: "Si l'autre était un personnage de film, ce serait lequel ?", hint: "" },
+  { category: "CHAOS 🔥", text: "Si vous deviez partir en road trip ensemble, quelle destination ?", hint: "" },
+  { category: "CHAOS 🔥", text: "Quelle célébrité ressemble le plus à l'autre selon toi ?", hint: "" },
+  { category: "CHAOS 🔥", text: "Si l'autre avait un surnom de rappeur, ce serait quoi ?", hint: "" },
+  { category: "CHAOS 🔥", text: "Dans quelle série l'autre s'intégrerait le mieux ?", hint: "" },
+  { category: "CHAOS 🔥", text: "Quel animal représente le mieux l'autre ?", hint: "" },
+  { category: "CHAOS 🔥", text: "Si l'autre était un plat, ce serait lequel ?", hint: "" },
+  { category: "CHAOS 🔥", text: "Quelle chanson correspond le mieux à la personnalité de l'autre ?", hint: "" },
+  { category: "CHAOS 🔥", text: "Si l'autre ouvrait un restaurant, quelle cuisine il servirait ?", hint: "" },
+  { category: "CHAOS 🔥", text: "Dans quel pays l'autre devrait-il vivre selon toi ?", hint: "" },
+  // COMPLÈTE LA PHRASE
+  { category: "COMPLÈTE ✍️", text: "Si j'étais un animal, je serais…", hint: "" },
+  { category: "COMPLÈTE ✍️", text: "Si j'étais un personnage de dessin animé, je serais…", hint: "" },
+  { category: "COMPLÈTE ✍️", text: "Mon plus grand plaisir coupable c'est…", hint: "" },
+  { category: "COMPLÈTE ✍️", text: "Si j'avais une journée entière pour moi, je passerais mon temps à…", hint: "" },
+  { category: "COMPLÈTE ✍️", text: "La chose qui me fait rire à coup sûr c'est…", hint: "" },
+  { category: "COMPLÈTE ✍️", text: "Si j'étais une ville, je serais…", hint: "" },
+  { category: "COMPLÈTE ✍️", text: "Mon énergie en soirée c'est plutôt… (décris-la en un mot)", hint: "" },
+  { category: "COMPLÈTE ✍️", text: "Si j'étais une boisson, je serais…", hint: "" },
+  { category: "COMPLÈTE ✍️", text: "Le truc que je ferais en premier si je gagnais au loto c'est…", hint: "" },
+  { category: "COMPLÈTE ✍️", text: "Si j'étais une époque, je vivrais en…", hint: "" },
+  { category: "COMPLÈTE ✍️", text: "Mon humeur du lundi matin ressemble à…", hint: "" },
+  { category: "COMPLÈTE ✍️", text: "Si j'étais un sport, je serais…", hint: "" },
+];
+
+let state = {
+  round: 1,
+  totalRounds: 10,
+  p1sips: 0,
+  p2sips: 0,
+  currentQ: null,
+  usedQuestions: [],
+  phase: 'question',
+  judged: { p1: null, p2: null },
+};
+
+function getRandomQuestion() {
+  const available = QUESTIONS.filter((_, i) => !state.usedQuestions.includes(i));
+  if (available.length === 0) {
+    state.usedQuestions = [];
+    return getRandomQuestion();
+  }
+  const pool = QUESTIONS.map((q, i) => ({ q, i })).filter(({ i }) => !state.usedQuestions.includes(i));
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  state.usedQuestions.push(pick.i);
+  return pick.q;
+}
+
+function getP1Name() { return document.getElementById('p1name').textContent || 'J1'; }
+function getP2Name() { return document.getElementById('p2name').textContent || 'J2'; }
+
+function startGame() {
+  const p1 = document.getElementById('startP1').value.trim().toUpperCase();
+  const p2 = document.getElementById('startP2').value.trim().toUpperCase();
+  if (!p1 || !p2) { showToast('Entrez les deux prénoms !'); return; }
+  document.getElementById('p1name').textContent = p1;
+  document.getElementById('p2name').textContent = p2;
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('gameArea').style.display = 'block';
+  loadQuestion();
+  updateUI();
+}
+
+function updateUI() {
+  document.getElementById('p1sips').textContent = state.p1sips;
+  document.getElementById('p2sips').textContent = state.p2sips;
+  document.getElementById('roundNum').textContent = state.round;
+  document.getElementById('totalRounds').textContent = state.totalRounds;
+
+  const p1n = getP1Name();
+  const p2n = getP2Name();
+
+  document.getElementById('p1AnswerLabel').textContent = p1n;
+  document.getElementById('p2AnswerLabel').textContent = p2n;
+  document.getElementById('p1guess').placeholder = `La réponse de ${p2n} selon toi...`;
+  document.getElementById('p2guess').placeholder = `La réponse de ${p1n} selon toi...`;
+  document.getElementById('revP1Name').textContent = p1n;
+  document.getElementById('revP2Name').textContent = p2n;
+}
+
+function loadQuestion() {
+  state.currentQ = getRandomQuestion();
+  document.getElementById('qCategory').textContent = state.currentQ.category;
+  document.getElementById('qText').textContent = state.currentQ.text;
+  document.getElementById('qHint').textContent = state.currentQ.hint;
+
+  // Clear inputs
+  ['p1answer','p1guess','p2answer','p2guess'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+
+  // Steps
+  document.getElementById('step1').className = 'step-pill active';
+  document.getElementById('step2').className = 'step-pill';
+  document.getElementById('step3').className = 'step-pill';
+}
+
+function showPhase(phase) {
+  ['phaseQuestion','phaseAnswers','phaseReveal'].forEach(id => {
+    document.getElementById(id).className = 'hidden-phase';
+  });
+  document.getElementById('phase' + phase).className = 'hidden-phase active';
+}
+
+function goToAnswers() {
+  document.getElementById('qCategory2').textContent = state.currentQ.category;
+  document.getElementById('qText2').textContent = state.currentQ.text;
+  showPhase('Answers');
+  document.getElementById('p1AnswerBlock').className = 'answer-section active';
+  document.getElementById('p2AnswerBlock').className = 'answer-section';
+  document.getElementById('step1').className = 'step-pill done';
+  document.getElementById('step2').className = 'step-pill active';
+  updateUI();
+}
+
+function goToQuestion() {
+  showPhase('Question');
+  document.getElementById('step1').className = 'step-pill active';
+  document.getElementById('step2').className = 'step-pill';
+  document.getElementById('step3').className = 'step-pill';
+}
+
+function submitP1() {
+  const ans = document.getElementById('p1answer').value.trim();
+  const guess = document.getElementById('p1guess').value.trim();
+  if (!ans || !guess) { showToast('Remplis les deux champs !'); return; }
+  document.getElementById('p1AnswerBlock').className = 'answer-section';
+  document.getElementById('p2AnswerBlock').className = 'answer-section active';
+  showToast('✅ Joueur 1 a répondu !');
+}
+
+function submitP2() {
+  const ans = document.getElementById('p2answer').value.trim();
+  const guess = document.getElementById('p2guess').value.trim();
+  if (!ans || !guess) { showToast('Remplis les deux champs !'); return; }
+
+  // Go to reveal
+  showReveal();
+}
+
+function showReveal() {
+  const p1ans = document.getElementById('p1answer').value.trim();
+  const p2ans = document.getElementById('p2answer').value.trim();
+  const p1guess = document.getElementById('p1guess').value.trim();
+  const p2guess = document.getElementById('p2guess').value.trim();
+
+  document.getElementById('revP1Answer').textContent = p1ans;
+  document.getElementById('revP2Answer').textContent = p2ans;
+  document.getElementById('revP2Guess').textContent = p2guess;
+  document.getElementById('revP1Guess').textContent = p1guess;
+
+  // Auto-detect obvious matches
+  const p2autoHit = similar(p2guess, p1ans);
+  const p1autoHit = similar(p1guess, p2ans);
+
+  // Reset state
+  state.judgeP1 = null;
+  state.judgeP2 = null;
+  state.judged = { p1: p1autoHit, p2: p2autoHit };
+
+  // Show badges + manual buttons
+  renderJudge('p1', p1autoHit, true);
+  renderJudge('p2', p2autoHit, true);
+
+  document.getElementById('drinkAlert').innerHTML = '';
+  document.getElementById('nextRoundBtn').style.display = 'none';
+
+  document.getElementById('step2').className = 'step-pill done';
+  document.getElementById('step3').className = 'step-pill active';
+
+  showPhase('Reveal');
+  updateUI();
+}
+
+function renderJudge(player, isHit, showButtons) {
+  const p1n = getP1Name();
+  const p2n = getP2Name();
+  const badgeEl = document.getElementById(player + 'resultBadge');
+  const btnEl = document.getElementById(player + 'manualBtns');
+  const drinker = player === 'p1' ? p1n : p2n;
+
+  if (isHit) {
+    badgeEl.innerHTML = '<span class="result-badge result-hit">🎯 SNIPER !</span>';
+  } else {
+    badgeEl.innerHTML = `<span class="result-badge result-miss">💥 RATÉ — ${drinker} boit !</span>`;
+  }
+
+  btnEl.style.display = showButtons ? 'flex' : 'none';
+}
+
+function manualJudge(player, isHit) {
+  const p1n = getP1Name();
+  const p2n = getP2Name();
+
+  state.judged[player] = isHit;
+
+  // Hide that player's buttons after judging
+  document.getElementById(player + 'manualBtns').style.display = 'none';
+  renderJudge(player, isHit, false);
+
+  // Check if both judged (buttons hidden for both)
+  const p1btnHidden = document.getElementById('p1manualBtns').style.display === 'none';
+  const p2btnHidden = document.getElementById('p2manualBtns').style.display === 'none';
+
+  if (p1btnHidden && p2btnHidden) {
+    // Calculate sips
+    let drinkers = [];
+    if (!state.judged.p2) { state.p2sips++; drinkers.push(p2n); }
+    if (!state.judged.p1) { state.p1sips++; drinkers.push(p1n); }
+
+    const alert = document.getElementById('drinkAlert');
+    if (drinkers.length === 2) {
+      alert.innerHTML = '<div class="drink-alert">🍺 TOUT LE MONDE BOIT !</div>';
+    } else if (drinkers.length === 1) {
+      alert.innerHTML = `<div class="drink-alert">🍺 ${drinkers[0].toUpperCase()} BOIT UNE GORGÉE !</div>`;
+    } else {
+      alert.innerHTML = '<div class="drink-alert" style="background:rgba(0,230,118,0.1); border-color:rgba(0,230,118,0.4); color:var(--success);">🎯 DEUX SNIPERS ! PERSONNE NE BOIT !</div>';
+    }
+
+    document.getElementById('nextRoundBtn').style.display = 'block';
+    updateUI();
+  }
+}
+
+function similar(a, b) {
+  a = a.toLowerCase().trim();
+  b = b.toLowerCase().trim();
+  if (a === b) return true;
+  // Check if one contains the other (for short answers)
+  if (a.length > 2 && b.includes(a)) return true;
+  if (b.length > 2 && a.includes(b)) return true;
+  return false;
+}
+
+function skipQuestion() {
+  loadQuestion();
+  showToast('🔄 Nouvelle question !');
+}
+
+function nextRound() {
+  if (state.round >= state.totalRounds) {
+    showGameOver();
+    return;
+  }
+  state.round++;
+  loadQuestion();
+  showPhase('Question');
+  updateUI();
+}
+
+function showGameOver() {
+  document.getElementById('gameArea').style.display = 'none';
+  document.getElementById('gameOver').className = 'gameover active';
+
+  const p1n = getP1Name();
+  const p2n = getP2Name();
+
+  document.getElementById('finalP1Name').textContent = p1n;
+  document.getElementById('finalP2Name').textContent = p2n;
+  document.getElementById('finalP1Sips').textContent = state.p1sips;
+  document.getElementById('finalP2Sips').textContent = state.p2sips;
+
+  const p1Card = document.getElementById('finalP1Card');
+  const p2Card = document.getElementById('finalP2Card');
+  const winnerText = document.getElementById('winnerText');
+
+  if (state.p1sips < state.p2sips) {
+    p1Card.className = 'final-player winner';
+    p1Card.innerHTML = '<span class="winner-crown">👑</span>' + p1Card.innerHTML;
+    winnerText.textContent = `${p1n} est le meilleur sniper !`;
+  } else if (state.p2sips < state.p1sips) {
+    p2Card.className = 'final-player winner';
+    p2Card.innerHTML = '<span class="winner-crown">👑</span>' + p2Card.innerHTML;
+    winnerText.textContent = `${p2n} est le meilleur sniper !`;
+  } else {
+    winnerText.textContent = `ÉGALITÉ ! Vous vous connaissez trop bien 🎯`;
+  }
+}
+
+function restartGame() {
+  state = {
+    round: 1,
+    totalRounds: 10,
+    p1sips: 0,
+    p2sips: 0,
+    currentQ: null,
+    usedQuestions: [],
+    phase: 'question',
+    judged: { p1: null, p2: null },
+  };
+
+  document.getElementById('gameArea').style.display = 'none';
+  document.getElementById('gameOver').className = 'gameover';
+  document.getElementById('startScreen').style.display = 'block';
+  document.getElementById('startP1').value = '';
+  document.getElementById('startP2').value = '';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show';
+  setTimeout(() => { t.className = 'toast'; }, 2000);
+}
+
+// Game starts via startGame() from the start screen
+</script>
+</body>
+</html>
